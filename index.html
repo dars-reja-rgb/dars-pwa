@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#9C27B0">
+    <title>Dars Rejasi Generator</title>
+    <link rel="manifest" href="/static/manifest.json">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #e0b0ff;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 25px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            font-size: 13px;
+            color: #ccc;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #333;
+            border-radius: 10px;
+            background: #1e1e2e;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        input:focus {
+            border-color: #9C27B0;
+        }
+        
+        input::placeholder {
+            color: #666;
+        }
+        
+        button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #9C27B0, #7B1FA2);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.1s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        #natija {
+            margin-top: 25px;
+            padding: 20px;
+            background: #1e1e2e;
+            border-radius: 12px;
+            border: 1px solid #333;
+            font-size: 14px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            min-height: 100px;
+            display: none;
+        }
+        
+        #natija.show {
+            display: block;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #9C27B0;
+            font-size: 14px;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #333;
+            border-top-color: #9C27B0;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>?? Dars Rejasi Generator</h1>
+        <p class="subtitle">AI bilan 5 sekundda dars rejasi</p>
+        
+        <div class="input-group">
+            <label>Mavzu</label>
+            <input type="text" id="mavzu" placeholder="Masalan: Fotosintez">
+        </div>
+        
+        <div class="input-group">
+            <label>Sinf</label>
+            <input type="text" id="sinf" placeholder="Masalan: 7-sinf">
+        </div>
+        
+        <div class="input-group">
+            <label>Fan</label>
+            <input type="text" id="fan" placeholder="Masalan: Biologiya">
+        </div>
+        
+        <button id="btn" onclick="yaratish()">REJA YARATISH</button>
+        
+        <div id="natija"></div>
+    </div>
+    
+    <script>
+        async function yaratish() {
+            const mavzu = document.getElementById('mavzu').value.trim();
+            const sinf = document.getElementById('sinf').value.trim();
+            const fan = document.getElementById('fan').value.trim();
+            const natija = document.getElementById('natija');
+            const btn = document.getElementById('btn');
+            
+            if (!mavzu) {
+                natija.classList.add('show');
+                natija.innerHTML = '?? Iltimos, mavzuni kiriting!';
+                return;
+            }
+            
+            btn.disabled = true;
+            natija.classList.add('show');
+            natija.innerHTML = '<div class="loading"><span class="spinner"></span>Yaratilmoqda... (5-10 sekund)</div>';
+            
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({mavzu, sinf, fan})
+                });
+                
+                const data = await response.json();
+                natija.textContent = data.natija;
+            } catch (e) {
+                natija.textContent = '? Xatolik: ' + e.message;
+            }
+            
+            btn.disabled = false;
+        }
+        
+        document.getElementById('mavzu').addEventListener('keypress', e => {
+            if (e.key === 'Enter') yaratish();
+        });
+    </script>
+</body>
+</html>
